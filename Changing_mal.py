@@ -32,12 +32,12 @@ def storagepath(system):
 		user = getpass.getuser()
 		if(system=="Windows"):
 			try:
-				file = open("C:\users\%s\AppData\Local\Temp\.file.txt" % user, 'w')
+				file = open("C:/users/%s/AppData/Local/Temp/.file.txt" % user, 'w')
 			except Exception as e:
 				print "failed 30"
 				#I Don't really know where to go here
 			try:
-				file = open("C:\Users\%s\Documents\.systemConf.txt" % user, 'w')
+				file = open("C:/Users/%s/Documents/.systemConf.txt" % user, 'w')
 			except Exception as e:
 				print "failed 31"
 		else:
