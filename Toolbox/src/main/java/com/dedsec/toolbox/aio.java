@@ -17,5 +17,6 @@ public class aio {
         for (int x = 0; x < iprange.size(); x++) {
             System.out.println(iprange.get(x));
         }
+        read.close();
     }
 }
