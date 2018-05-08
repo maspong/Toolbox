@@ -3,9 +3,9 @@ import java.io.*;
 import java.util.*;
 import java.net.Inet4Address;
 import java.io.*;
-
-//import java.net.InterfaceAddress;
+/**Pings a local area network for live hosts */
 public class Wu_taiChin {
+  //////////////////////////////////////////////method for writing results to a file//
   public static BufferedWriter logging() {
     boolean written = false;
     BufferedWriter wTo = null;
@@ -20,10 +20,12 @@ public class Wu_taiChin {
     return wTo;
   }
 
+  ///////////////////////////do a ping sweep to discover available hosts on a network//
   public static void checkHosts(CharSequence first3octet, BufferedWriter wTo) throws IOException {
     int timeout = 1000;
+    String neighbor;
     for (int i = 1; i < 255; i++) {
-      String neighbor = first3octet + "." + i;
+      neighbor = first3octet + "." + i;
       try {
         if (InetAddress.getByName(neighbor).isReachable(timeout)) {
           System.out.println(neighbor + " is reachable");
@@ -34,66 +36,6 @@ public class Wu_taiChin {
       } catch (IOException e) {
         System.out.println("IOError exists" + e);
       }
-      // wTo.close();
-      // wTo.();
-    }
-  }
-
-  public static void HostAddress() {
-
-  }
-
-  public static void main(String[] args) {
-    // Get internal address
-    String address = null;
-    short mask = 0;
-    BufferedWriter wTo = logging();
-
-    try {
-      NetworkInterface nic = NetworkInterface.getByName("");
-      String OS = System.getProperty("os.name");
-      System.out.println(OS); // comment out for file writing
-      wTo.append("Operating system of infected host is: " + OS + "\n");// comment out for system viewing
-      if ("Windows".equals(OS)) {
-        nic = NetworkInterface.getByName("Wireless LAN adapter Wi-Fi");
-      }
-      if ("Linux".equals(OS)) {
-        nic = NetworkInterface.getByName("wlan0");
-      }
-      int x = 0;
-      do {
-        mask = nic.getInterfaceAddresses().get(x).getNetworkPrefixLength();
-        x += 1;
-      } while (mask > 32);
-      System.out.println(mask); // comment out for file writing
-      wTo.append("Subnet of infected host is: " + mask + "\n"); // comment out for system viewing
-      ip_range(mask, wTo);
-      Enumeration<InetAddress> inetaddress = nic.getInetAddresses();
-      InetAddress currentAddress;
-      // String subnetmask = currentAddress.getSubnetMask();
-      // System.out.println(subnetmask);
-      while (inetaddress.hasMoreElements()) {
-        currentAddress = inetaddress.nextElement();
-        address = currentAddress.getHostAddress();
-        if (currentAddress instanceof Inet4Address && !currentAddress.isLoopbackAddress())
-          // host = currentAddress.toString();
-          break;
-      }
-      System.out.println("The Address of infected host is: " + address); // delete/comment out if you are not
-                                                                         // getering info localy
-      wTo.append("The Address of the infected host is: " + address + "\n"); // delete/commnet out if you are not
-                                                                            // needing to write to a file
-      // System.out.println(currentAddress.getNetworkPrefixLength());
-      int parsedIndex = address.lastIndexOf(".");
-      CharSequence first3octet = address.subSequence(0, parsedIndex);
-      checkHosts(first3octet, wTo); // get devices on the network
-    } catch (IOException | NullPointerException a) {
-      System.out.println("Error: " + a.toString() + "\n\n");
-    }
-    try {
-      wTo.close();
-    } catch (IOException e) {
-      return;
     }
   }
 
@@ -111,10 +53,78 @@ public class Wu_taiChin {
       octect[x] = octect[x] + j;
       j = j / 2;
     }
-    System.out.println(octect[0] + "." + octect[1] + "." + octect[2] + "." + octect[3]); // comment out for file
-                                                                                         // writing
-    wTo.append(octect[0] + "." + octect[1] + "." + octect[2] + "." + octect[3] + "\n"); // comment out for system
-                                                                                        // viewing
+    /////////////////////////////////////////////////////options for viewing//
+    //console
+    System.out.println(octect[0] + "." + octect[1] + "." + octect[2] + "." + octect[3]); 
+    //IO to file 
+    wTo.append(octect[0] + "." + octect[1] + "." + octect[2] + "." + octect[3] + "\n");
+                   
     return octect;
+  }
+
+  public static void main(String[] args) {
+    String address = null;
+    short mask = 0;
+    BufferedWriter wTo = logging();
+    int x = 0;
+
+    ///////////////////////////////////////////////////// Get Host Nic address //
+    try {
+
+      //windows and linux name network interfaces diffently this decides what OS and nic//
+      NetworkInterface nic = NetworkInterface.getByName("");
+      String OS = System.getProperty("os.name");
+      if ("Windows".equals(OS)) {
+        nic = NetworkInterface.getByName("Wireless LAN adapter Wi-Fi");
+      }
+      else if ("Linux".equals(OS)) {
+        nic = NetworkInterface.getByName("wlan0");
+      }
+      else{
+        System.out.println("Unsupported opperating System.");
+      }
+
+      /////////////////////////////////////////get network mask (CIDR notation)//
+      do {
+        mask = nic.getInterfaceAddresses().get(x).getNetworkPrefixLength();
+        x += 1;
+      } while (mask > 32);
+      
+      /////////////////////////////////////////////////////options for viewing//
+      //console
+      System.out.println(OS);
+      System.out.println(mask); 
+      //IO to file
+      wTo.append("Operating system of infected host is: " + OS + "\n");
+      wTo.append("Subnet of infected host is: " + mask + "\n"); 
+
+
+      ip_range(mask, wTo);
+      Enumeration<InetAddress> inetaddress = nic.getInetAddresses();
+      InetAddress currentAddress;
+      while (inetaddress.hasMoreElements()) {
+        currentAddress = inetaddress.nextElement();
+        address = currentAddress.getHostAddress();
+        if (currentAddress instanceof Inet4Address && !currentAddress.isLoopbackAddress())
+          // host = currentAddress.toString();
+          break;
+      }
+      /////////////////////////////////////////////////////options for viewing//
+      //console
+      System.out.println("The Address of infected host is: " + address); 
+      //IO to file
+      wTo.append("The Address of the infected host is: " + address + "\n"); 
+
+      int parsedIndex = address.lastIndexOf(".");
+      CharSequence first3octet = address.subSequence(0, parsedIndex);
+      checkHosts(first3octet, wTo);
+    } catch (IOException | NullPointerException a) {
+      System.out.println("Error: " + a.toString() + "\n\n");
+    }
+    try {
+      wTo.close();
+    } catch (IOException e) {
+      return;
+    }
   }
 }
